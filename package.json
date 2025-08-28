@@ -5,18 +5,21 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "pm2 start index.js --watch"
+    "start": "nodemon index.js",
+    "stop": "pm2 stop all"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
     "bcryptjs": "^3.0.2",
     "dotenv": "17.2.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.0",
     "mongoose-sequence": "^6.0.1",
-    "pm2": "^6.0.8"
+    "pm2": "^6.0.8",
+    "twilio": "^5.8.0"
   }
 }

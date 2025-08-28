@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const userSchema = mongoose.Schema({
-    email: {
+    phone: {
         type: String
     },
-    password: {
+    email: {
         type: String
     },
     name:{
