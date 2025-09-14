@@ -8,11 +8,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const usersRoute = require('./routes/users');
+const locationRoute = require('./routes/locations');
+const stopRoute = require('./routes/stops');
+const travelsRoute = require('./routes/travels');
+const busRoute = require('./routes/bus');
+const cronJobRoute = require('./routes/cronjob');
 
 app.use('/users', usersRoute);
+app.use('/location', locationRoute);
+app.use('/stop', stopRoute);
+app.use('/travels', travelsRoute);
+app.use('/bus', busRoute);
+app.use('/cronjob', cronJobRoute);
 
 // Root Route
-app.get('/', (req, res) => {
+app.get('/check', (req, res) => {
     res.send('This is the root URL');
 });
 

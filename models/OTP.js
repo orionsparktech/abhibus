@@ -7,13 +7,10 @@ const OTPSchema = mongoose.Schema({
     },
     OTP: {
         type: String
-    },
-    createddate: {
-        type: Date,
-        default: Date.now(),
-        require: false    
     }
 
+},{
+    timestamps: true
 });
 
 

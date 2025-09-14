@@ -15,6 +15,7 @@ exports.login = async (req, res) => {
 
 console.log(myphone)
     if(myphone){
+
         if(myphone.length != 10)
         return res.status(400).json({"msg": "Please enter valid phone number"})
         
@@ -34,8 +35,16 @@ console.log(myphone)
             });
 
             if(user.save()){
-                var sendOTP = await sendOTPOnPhone("+91"+myphone, checkuser.userId);
-                res.status(200).json(user);
+                var checkuser1 = await User.findOne({"phone": myphone}).lean();
+                if(checkuser){
+                    var sendOTP = await sendOTPOnPhone("+91"+myphone, checkuser1.userId);
+                    res.status(200).json(checkuser1);
+                }
+                else{
+                    var sendOTP = await sendOTPOnPhone("+91"+myphone, checkuser1.userId);
+                    res.status(200).json(checkuser1);
+                }
+                
             }else{
                 res.status(400).json({"msg": "something went wrong in saving data"})
             }
@@ -82,7 +91,7 @@ exports.verify = async (req, res) => {
     if(myphone){
         var checkuser = await User.findOne({"phone": myphone}).lean()
         if(checkuser){
-            var checkOTP = await OTP.findOne({"userId": checkuser.userId}).lean()
+            var checkOTP = await OTP.findOne({"userId": checkuser.userId}).sort({ createdAt: -1 })
             if(checkOTP){
                 if(checkOTP.OTP == myotp){
                     return res.status(200).json({ "msg": "OTP Verified Successfully"})
@@ -95,6 +104,23 @@ exports.verify = async (req, res) => {
             }
         }
     }
+}
+
+exports.getUser = async (req, res) => {
+    console.log("done")
+    var myuserId = req.params.userId;
+
+    if(!myuserId)
+        return res.status(400).json({"msg": "userId required"})
+
+     if(myuserId)
+        var checkuser = await User.findOne({"userId": myuserId}).lean()
+        if(checkuser)
+            return res.status(200).json(checkuser);
+        else
+            return res.status(400).json({ "msg": "user not found"})
+
+
 }
 
 function generateUsername() {

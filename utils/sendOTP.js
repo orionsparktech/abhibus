@@ -37,10 +37,7 @@ async function sendOTPOnPhone(phoneNumber, userid) {
                             console.log("OTP not saved")
             return { otp: otp, sid: message.sid };
 
-                        }
-            
-
-
+            }
         })
         .catch(error => {
             console.error('Error sending OTP:', error.message);
