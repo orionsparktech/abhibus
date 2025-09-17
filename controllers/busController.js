@@ -94,6 +94,22 @@ exports.searchBuses = async (req, res) => {
    var sourcelocation = req.body.source;  
    var destinationlocation = req.body.destination;  
    var traveldate = req.body.date;
+
+   var sourceloc, destinationloc;
+
+   var checkSource = await Location.findOne({"locationname": sourcelocation})
+   if(checkSource)
+    sourceloc = checkSource.locationId
+  else
+    return res.status(400).json({ "msg": "No buses found in this route"})
+
+  var checkdestination = await Location.findOne({"locationname": destinationlocation})
+   if(checheckdestinationckSource)
+    destinationloc = checkdestination.locationId
+  else
+    return res.status(400).json({ "msg": "No buses found in this route"})
+
+
    
    var allbuses = await Bus.aggregate([
     { $match: { "source": sourcelocation, "destination": destinationlocation } },
@@ -194,7 +210,7 @@ exports.searchBuses = async (req, res) => {
     if(allbuses.length != 0)
         return res.status(200).json(allbuses)
     else
-        return res.status(400).json({"msg": "No Buses Found"})
+        return res.status(400).json({"msg": "No Buses Found in this route"})
 
 };
 

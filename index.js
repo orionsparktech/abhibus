@@ -13,6 +13,8 @@ const stopRoute = require('./routes/stops');
 const travelsRoute = require('./routes/travels');
 const busRoute = require('./routes/bus');
 const cronJobRoute = require('./routes/cronjob');
+const imageRoute = require('./routes/image');
+const hotelRoute = require('./routes/hotels');
 
 app.use('/users', usersRoute);
 app.use('/location', locationRoute);
@@ -20,6 +22,8 @@ app.use('/stop', stopRoute);
 app.use('/travels', travelsRoute);
 app.use('/bus', busRoute);
 app.use('/cronjob', cronJobRoute);
+app.use('/image', imageRoute);
+app.use('/hotel', hotelRoute);
 
 // Root Route
 app.get('/check', (req, res) => {
