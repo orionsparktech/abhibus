@@ -1,11 +1,14 @@
 const express = require('express');
 const app = express();
+const jwt = require('jsonwebtoken')
+const verifyToken = require('./utils/Verify')
 
 const mongoose = require('mongoose');
 require('dotenv/config');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 const usersRoute = require('./routes/users');
 const locationRoute = require('./routes/locations');
@@ -15,6 +18,7 @@ const busRoute = require('./routes/bus');
 const cronJobRoute = require('./routes/cronjob');
 const imageRoute = require('./routes/image');
 const hotelRoute = require('./routes/hotels');
+const appRoute = require('./routes/approute');
 
 app.use('/users', usersRoute);
 app.use('/location', locationRoute);
@@ -24,6 +28,7 @@ app.use('/bus', busRoute);
 app.use('/cronjob', cronJobRoute);
 app.use('/image', imageRoute);
 app.use('/hotel', hotelRoute);
+app.use('/app', appRoute);
 
 // Root Route
 app.get('/check', (req, res) => {
@@ -42,6 +47,10 @@ mongoose
   .catch((error) => {
     console.log(error);
   });
+
+
+
+
 
 
 app.listen(process.env.PORT || 3000, function () {

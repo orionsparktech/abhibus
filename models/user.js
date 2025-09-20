@@ -11,13 +11,18 @@ const userSchema = mongoose.Schema({
     name:{
         type: String
     },
-    createddate: {
-        type: Date,
-        default: Date.now(),
-        require: false
-        
+    imageurl: {
+        type: String
+    },
+    gender: {
+        type: String
+    },
+    dateofbirth: {
+        type: String
     }
 
+}, {
+    timestamps: true
 });
 
 userSchema.plugin(AutoIncrement, { inc_field: 'userId' });

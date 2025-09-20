@@ -2,8 +2,12 @@ const User = require('../models/user')
 const { sendOTPOnPhone } = require('../utils/sendOTP');
 const { sendEmailOTP } = require('../utils/emailOTPService');
 const OTP = require('../models/OTP');
+const jwt = require('jsonwebtoken')
+
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 
 exports.login = async (req, res) => {
+
 
     var myphone = req.body.phone;
     var myemail = req.body.email;
@@ -24,24 +28,34 @@ console.log(myphone)
         console.log(checkuser);
 
         if(checkuser){
-            console.log(checkuser.userId)
-            var sendOTP = await sendOTPOnPhone("+91"+myphone, checkuser.userId);
+            console.log("checkuser.userId")
+            await sendOTPOnPhone("+91"+myphone, checkuser.userId);
+            const accessToken = jwt.sign(checkuser, process.env.jwttoken);
+            checkuser.token = accessToken
             res.status(200).json(checkuser);
 
         }else{
             var user = await new User({
                 phone: req.body.phone,
-                name: generateUsername()
+                name: generateUsername(),
+                gender: "",
+                dateofbirth: "",
+                imageurl: "",
+                email: ""
             });
 
             if(user.save()){
                 var checkuser1 = await User.findOne({"phone": myphone}).lean();
                 if(checkuser){
-                    var sendOTP = await sendOTPOnPhone("+91"+myphone, checkuser1.userId);
+                    await sendOTPOnPhone("+91"+myphone, checkuser1.userId);
+                    const accessToken1 = jwt.sign(checkuser1, process.env.jwttoken);
+            checkuser1.token = accessToken1
                     res.status(200).json(checkuser1);
                 }
                 else{
                     var sendOTP = await sendOTPOnPhone("+91"+myphone, checkuser1.userId);
+                     const accessToken1 = jwt.sign(checkuser1, process.env.jwttoken);
+            checkuser1.token = accessToken1
                     res.status(200).json(checkuser1);
                 }
                 
@@ -64,7 +78,11 @@ console.log(myphone)
         }else{
             var user = await new User({
                 email: myemail,
-                name: generateUsername()
+                name: generateUsername(),
+                phone: "",
+                gender: "",
+                dateofbirth: "",
+                imageurl: ""
             });
 
             if(user.save()){
@@ -108,7 +126,7 @@ exports.verify = async (req, res) => {
 
 exports.getUser = async (req, res) => {
     console.log("done")
-    var myuserId = req.params.userId;
+    var myuserId = req.userId;
 
     if(!myuserId)
         return res.status(400).json({"msg": "userId required"})
@@ -123,7 +141,67 @@ exports.getUser = async (req, res) => {
 
 }
 
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_KEY,
+  },
+});
+
+exports.updateUser = async (req, res) => {
+
+    var userId = req.userId;
+    
+    if(!userId)
+        return res.status(400).json({"msg": "userId is required"})
+
+    var myUser = await User.findOne({"userId": userId});
+    
+
+    try {
+    if (req.file) {
+        var profileImageUrl = null;
+      // Prepare S3 upload params
+      s3Key = `profile-images/${Date.now()}-${req.file.originalname}`;
+      const uploadParams = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: s3Key,
+        Body: req.file.buffer,
+        ContentType: req.file.mimetype,
+      };
+
+      // Upload file to S3
+      const command = new PutObjectCommand(uploadParams);
+      await s3Client.send(command);
+
+      // Construct public URL
+      profileImageUrl = `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
+    } 
+}catch (error) {
+    console.error('Error uploading image:', error);
+    return res.status(500).json({ error: 'Failed to update profile image' });
+  }
+   
+
+    if(myUser){
+        if(req.file)
+            var updateUserDetails = await User.updateOne({"userId": userId}, { "imageurl": profileImageUrl });
+        else
+            var updateUserDetails = await User.updateOne({"userId": userId}, { $set: req.body });
+
+        if(updateUserDetails)
+            return res.status(200).json(updateUserDetails);
+        else
+            return res.status(400).json({"msg": "User not updated due to error"})
+    }
+    else
+        return res.status(400).json({"msg": "No User Found"})
+    
+}
+
 function generateUsername() {
     const randomNumber = Math.floor(1000 + Math.random() * 9000); // 7-digit number
     return 'user' + randomNumber;
 }
+
